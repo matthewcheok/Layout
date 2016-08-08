@@ -19,40 +19,16 @@ public struct InsetLayout: LayoutProtocol {
   
   public var estimatedLayoutSize: LayoutSize {
     let contentSize = content.estimatedLayoutSize
-    switch (contentSize.width, contentSize.height) {
-    case let (.fixed(width), .fixed(height)):
-      return LayoutSize(
-        width: .fixed(width + insets.left + insets.right),
-        height: .fixed(height + insets.top + insets.bottom)
-      )
-    case let (.flexible, .fixed(height)):
-      return LayoutSize(
-        height: height + insets.top + insets.bottom
-      )
-    case let (.fixed(width), .flexible):
-      return LayoutSize(
-        width: width + insets.left + insets.right
-      )
-    default:
-      return .flexible
-    }
+    return LayoutSize(
+      width: contentSize.width.adjustedLength(insets.left + insets.right),
+      height: contentSize.height.adjustedLength(insets.top + insets.bottom)
+    )
   }
   
-  func reducedLength(length: LayoutDimension, inset: CGFloat) -> LayoutDimension {
-    switch length {
-    case .flexible:
-      return .flexible
-    case .maximum(let value):
-      return .maximum(value - inset)
-    case .fixed(let value):
-      return .fixed(value - inset)
-    }
-  }
-  
-  public func computeLayout(forSize size: LayoutSize) -> LayoutDescription {
+  public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
     let contentSize = LayoutSize(
-      width: reducedLength(length: size.width, inset: insets.left + insets.right),
-      height: reducedLength(length: size.height, inset: insets.top + insets.bottom)
+      width: containingSize.width.adjustedLength(-insets.left - insets.right),
+      height: containingSize.height.adjustedLength(-insets.top - insets.bottom)
     )
     
     let info = content.computeLayout(forSize: contentSize)
@@ -72,7 +48,19 @@ public struct InsetLayout: LayoutProtocol {
         .map { $0.extendPath("InsetLayout") }
     )
   }
+}
 
+private extension LayoutDimension {
+  func adjustedLength(_ amount: CGFloat) -> LayoutDimension {
+    switch self {
+    case .flexible:
+      return .flexible
+    case .maximum(let value):
+      return .maximum(value + amount)
+    case .fixed(let value):
+      return .fixed(value + amount)
+    }
+  }
 }
 
 
