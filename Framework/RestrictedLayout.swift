@@ -41,25 +41,10 @@ public struct RestrictedLayout: LayoutProtocol {
     return size
   }
   
-  func mostRestrictiveLength(_ length1: LayoutDimension, _ length2: LayoutDimension) -> LayoutDimension {
-    switch (length1, length2) {
-    case let (.fixed(length), _):
-      return .fixed(length)
-    case let (.maximum(length), _):
-      return .maximum(length)
-    case let (_, .fixed(length)):
-      return .fixed(length)
-    case let (_, .maximum(length)):
-      return .maximum(length)
-    default:
-      return length1
-    }
-  }
-  
   public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
     let contentSize = LayoutSize(
-      width: mostRestrictiveLength(size.width, containingSize.width),
-      height: mostRestrictiveLength(size.height, containingSize.height)
+      width: size.width.restrictedLength(containingSize.width),
+      height: size.height.restrictedLength(containingSize.height)
     )
     let info = content.computeLayout(
       forSize: contentSize
@@ -71,4 +56,21 @@ public struct RestrictedLayout: LayoutProtocol {
       })
   }
   
+}
+
+private extension LayoutDimension {
+  func restrictedLength(_ length: LayoutDimension) -> LayoutDimension {
+    switch (self, length) {
+    case let (.fixed(length), _):
+      return .fixed(length)
+    case let (.maximum(length), _):
+      return .maximum(length)
+    case let (_, .fixed(length)):
+      return .fixed(length)
+    case let (_, .maximum(length)):
+      return .maximum(length)
+    default:
+      return self
+    }
+  }
 }
