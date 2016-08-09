@@ -8,12 +8,8 @@
 
 import UIKit
 
+/// Manages and configures `UIView` subclasses for a layout
 public protocol LayoutProviding {
-  // Makes the infrastructure instantiate an extra copy of the view
-  // to calculate size information.
-  // Custom layouts should return false.
-  static var usesSizeToFit: Bool { get }
-  
   /// Called if there is no view available for this component.
   /// - Returns: An instance of a `UIView` subclass.
   static func createView() -> UIView
@@ -26,9 +22,32 @@ public protocol LayoutProviding {
   static func setupView(view: UIView, layout: LayoutProtocol)
 }
 
-public extension LayoutProviding {
+/// Makes the infrastructure instantiate an extra copy of the view
+/// to calculate size information.
+public protocol DefaultLayoutProviding: LayoutProviding {
+  static func sizeThatFits(layout: LayoutProtocol) -> CGSize
+}
+
+private var cachedViews = [String: UIView]()
+
+public extension DefaultLayoutProviding {
   /// Defaults to `false`
   static var usesSizeToFit: Bool {
     return false
   }
+  
+  static func sizeThatFits(layout: LayoutProtocol) -> CGSize {
+    let view: UIView
+    if let sample = cachedViews[String(self.dynamicType)] {
+      view = sample
+    } else {
+      view = createView()
+      cachedViews[String(self.dynamicType)] = view
+    }
+    
+    setupView(view: view, layout: layout)
+    let size = view.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
+    return size
+  }
 }
+

@@ -27,7 +27,29 @@ public protocol LayoutProtocol {
 public extension LayoutProtocol {
   /// Defaults to flexible
   var estimatedLayoutSize: LayoutSize {
-    return .flexible
+    guard let defaultProvider = self.dynamicType.layoutProvider() as? DefaultLayoutProviding.Type else {
+      return .flexible
+    }
+    
+    let size = defaultProvider.sizeThatFits(layout: self)
+    return LayoutSize(cgSize: size)
+  }
+  
+  public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
+    guard let defaultProvider = self.dynamicType.layoutProvider() as? DefaultLayoutProviding.Type else {
+      fatalError("Implementation of computeLayout(forSize:) not provided for a non-default layout")
+    }
+
+    let size = defaultProvider.sizeThatFits(layout: self)
+    return LayoutDescription(
+      size: size,
+      items: [
+        LayoutItem(
+          path: "\(self.dynamicType)",
+          frame: CGRect(origin: .zero, size: size),
+          layout: self
+        )
+      ])
   }
   
   /// Defaults to `UIView`-less layout

@@ -22,24 +22,6 @@ public struct ButtonComponent: LayoutProtocol {
   public static func layoutProvider() -> LayoutProviding.Type? {
     return ButtonComponentProvider.self
   }
-  
-  public var estimatedLayoutSize: LayoutSize {
-    let size = ButtonComponentProvider.sizeThatFits(layout: self)
-    return LayoutSize(cgSize: size)
-  }
-  
-  public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
-    let size = ButtonComponentProvider.sizeThatFits(layout: self)
-    return LayoutDescription(
-      size: size,
-      items: [
-        LayoutItem(
-          path: "ButtonComponent",
-          frame: CGRect(origin: .zero, size: size),
-          layout: self
-        )
-      ])
-  }
 }
 
 extension UIButton {
@@ -58,22 +40,15 @@ extension UIButton {
     self.actionHandleBlock()
   }
   
-  func actionHandle(controlEvents events :UIControlEvents, ForAction action:() -> Void) {
+  private func actionHandle(controlEvents events :UIControlEvents, ForAction action:() -> Void) {
     self.actionHandleBlock(action: action)
     self.addTarget(self, action: #selector(UIButton.triggerActionHandleBlock), for: events)
   }
 }
 
-class ButtonComponentProvider: LayoutProviding {
+class ButtonComponentProvider: DefaultLayoutProviding {
   typealias Layout = ButtonComponent
   typealias View = UIButton
-  
-  static let sample = UIButton()
-  static func sizeThatFits(layout: LayoutProtocol) -> CGSize {
-    setupView(view: sample, layout: layout)
-    let size = sample.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
-    return size
-  }
   
   static func createView() -> UIView {
     return View()

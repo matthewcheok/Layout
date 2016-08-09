@@ -16,11 +16,7 @@ public struct WrappedComponent<View: UIView>: LayoutProtocol, LayoutProviding {
     return self
   }
   
-  public init(configuration: (View)->Void) {
-    self.init(size: .flexible, configuration: configuration)
-  }
-  
-  public init(size: LayoutSize, configuration: (View)->Void) {
+  public init(size: LayoutSize = .flexible, configuration: (View)->Void) {
     self.size = size
     self.configuration = configuration
   }
