@@ -9,7 +9,8 @@
 import UIKit
 
 public class LayoutViewController: UIViewController {
-  let hostingView = LayoutHostingView()
+  public let hostingView = LayoutHostingView()
+  
   public var layout: LayoutProtocol = NilLayout() {
     didSet {
       hostingView.layout = layout

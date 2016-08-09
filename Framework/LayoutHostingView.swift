@@ -12,17 +12,18 @@ public class LayoutHostingView: UIView {
   
   let debugView = LayoutDebugView()
   let debugLabel = LayoutDebugLabel()
+  let debugPress = UILongPressGestureRecognizer()
   
   override init(frame: CGRect) {
     super.init(frame: frame)
-    
     backgroundColor = .white
     
     let tap = UITapGestureRecognizer(target: self, action: #selector(debugViewTapped))
     debugView.addGestureRecognizer(tap)
     
-    let press = UILongPressGestureRecognizer(target: self, action: #selector(handlePress(press:)))
-    addGestureRecognizer(press)
+    debugPress.addTarget(self, action: #selector(handlePress(press:)))
+    debugPress.isEnabled = false
+    addGestureRecognizer(debugPress)
   }
   
   required public init?(coder aDecoder: NSCoder) {
@@ -30,6 +31,12 @@ public class LayoutHostingView: UIView {
   }
   
   // MARK: - Debugging
+  
+  public var debugging: Bool = false {
+    didSet {
+      debugPress.isEnabled = debugging
+    }
+  }
   
   func handlePress(press: UILongPressGestureRecognizer) {
     let location = press.location(in: self)

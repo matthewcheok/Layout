@@ -15,6 +15,8 @@ class DemoViewController: LayoutViewController {
     
     let tap = UITapGestureRecognizer(target: self, action: #selector(_didTap))
     view.addGestureRecognizer(tap)
+    
+    hostingView.debugging = true
   }
   
   func _didTap() {
