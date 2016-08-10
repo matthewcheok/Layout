@@ -13,14 +13,39 @@ public struct ButtonComponent: LayoutProtocol {
   let image: UIImage?
   let action: () -> Void
   
+  static let provider = DefaultLayoutProvider<UIButton, ButtonComponent>(setup: {
+      (view, layout) in
+      view.setTitle(layout.title, for: .normal)
+      view.setImage(layout.image, for: .normal)
+      view.actionHandle(controlEvents: .touchUpInside, ForAction: layout.action)
+    })
+  
   public init(title: String? = nil, image: UIImage? = nil, action: () -> Void) {
     self.title = title
     self.image = image
     self.action = action
   }
+
+  public var estimatedLayoutSize: LayoutSize {
+    let size = self.dynamicType.provider.sizeThatFits(layout: self)
+    return LayoutSize(cgSize: size)
+  }
+
+  public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
+    let size = self.dynamicType.provider.sizeThatFits(layout: self)
+    return LayoutDescription(
+      size: size,
+      items: [
+        LayoutItem(
+          path: "ButtonComponent",
+          frame: CGRect(origin: .zero, size: size),
+          layout: self
+        )
+      ])
+  }
   
-  public static func layoutProvider() -> LayoutProviding.Type? {
-    return ButtonComponentProvider.self
+  public static func layoutProvider() -> LayoutProviding? {
+    return provider
   }
 }
 
@@ -43,28 +68,5 @@ extension UIButton {
   private func actionHandle(controlEvents events :UIControlEvents, ForAction action:() -> Void) {
     self.actionHandleBlock(action: action)
     self.addTarget(self, action: #selector(UIButton.triggerActionHandleBlock), for: events)
-  }
-}
-
-class ButtonComponentProvider: DefaultLayoutProviding {
-  typealias Layout = ButtonComponent
-  typealias View = UIButton
-  
-  static func createView() -> UIView {
-    return View()
-  }
-  
-  static func setupView(view: UIView, layout: LayoutProtocol) {
-    guard let view = view as? View else {
-      fatalError()
-    }
-    
-    guard let layout = layout as? Layout else {
-      fatalError()
-    }
-    
-    view.setTitle(layout.title, for: .normal)
-    view.setImage(layout.image, for: .normal)
-    view.actionHandle(controlEvents: .touchUpInside, ForAction: layout.action)
   }
 }

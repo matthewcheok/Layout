@@ -14,8 +14,15 @@ public struct LabelComponent: LayoutProtocol {
   public let color: UIColor
   public let alignment: NSTextAlignment
   
-  public static func layoutProvider() -> LayoutProviding.Type? {
-    return LabelComponentProvider.self
+  public static func layoutProvider() -> LayoutProviding? {
+    return LayoutProvider<UILabel, LabelComponent>(setup: {
+      (view, layout) in
+      view.numberOfLines = 0
+      view.text = layout.text
+      view.font = layout.font
+      view.textColor = layout.color
+      view.textAlignment = layout.alignment
+    })
   }
   
   public init(text: String, font: UIFont = .systemFont(ofSize: 17), color: UIColor = .black, alignment: NSTextAlignment = .left) {
@@ -68,30 +75,5 @@ public struct LabelComponent: LayoutProtocol {
           layout: self
         )
       ])
-  }
-}
-
-class LabelComponentProvider: LayoutProviding {
-  typealias Layout = LabelComponent
-  typealias View = UILabel
- 
-  static func createView() -> UIView {
-    return View()
-  }
-  
-  static func setupView(view: UIView, layout: LayoutProtocol) {
-    guard let view = view as? View else {
-      fatalError()
-    }
-    
-    guard let layout = layout as? Layout else {
-      fatalError()
-    }
-    
-    view.numberOfLines = 0
-    view.text = layout.text
-    view.font = layout.font
-    view.textColor = layout.color
-    view.textAlignment = layout.alignment
   }
 }

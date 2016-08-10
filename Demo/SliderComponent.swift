@@ -14,8 +14,16 @@ struct SliderComponent: LayoutProtocol {
   let maximumValueImage: UIImage?
   let thumbImage: UIImage?
   
-  static func layoutProvider() -> LayoutProviding.Type? {
-    return SliderComponentProvider.self
+  static func layoutProvider() -> LayoutProviding? {
+    return LayoutProvider<UISlider, SliderComponent>(setup: {
+      (view, layout) in
+      view.value = 0.4
+      view.setMinimumTrackImage(UIImage(named: "slider-track-min"), for: .normal)
+      view.setMaximumTrackImage(UIImage(named: "slider-track-max"), for: .normal)
+      view.minimumValueImage = layout.minimumValueImage
+      view.maximumValueImage = layout.maximumValueImage
+      view.setThumbImage(layout.thumbImage, for: .normal)
+    })
   }
   
   init(minimumValueImage: UIImage? = nil, maximumValueImage: UIImage? = nil, thumbImage: UIImage? = nil) {
@@ -40,31 +48,5 @@ struct SliderComponent: LayoutProtocol {
           layout: self
         )
       ])
-  }
-}
-
-class SliderComponentProvider: LayoutProviding {
-  typealias Layout = SliderComponent
-  typealias View = UISlider
-  
-  static func createView() -> UIView {
-    return View()
-  }
-  
-  static func setupView(view: UIView, layout: LayoutProtocol) {
-    guard let view = view as? View else {
-      fatalError()
-    }
-    
-    guard let layout = layout as? Layout else {
-      fatalError()
-    }
-    
-    view.value = 0.4
-    view.setMinimumTrackImage(UIImage(named: "slider-track-min"), for: .normal)
-    view.setMaximumTrackImage(UIImage(named: "slider-track-max"), for: .normal)
-    view.minimumValueImage = layout.minimumValueImage
-    view.maximumValueImage = layout.maximumValueImage
-    view.setThumbImage(layout.thumbImage, for: .normal)
   }
 }

@@ -12,8 +12,11 @@ public struct ImageComponent: LayoutProtocol {
   public let image: UIImage?
   public let contentMode: UIViewContentMode
   
-  public static func layoutProvider() -> LayoutProviding.Type? {
-    return ImageComponentProvider.self
+  public static func layoutProvider() -> LayoutProviding? {
+    return LayoutProvider<UIImageView, ImageComponent>(setup: {
+      (view, layout) in
+      view.image = layout.image
+    })
   }
   
   public init(image: UIImage?, contentMode: UIViewContentMode = .center) {
@@ -49,26 +52,4 @@ public struct ImageComponent: LayoutProtocol {
                           layout: self
                         )])
   }
-}
-
-class ImageComponentProvider: LayoutProviding {
-  typealias Layout = ImageComponent
-  typealias View = UIImageView
-  
-  static func createView() -> UIView {
-    return View()
-  }
-  
-  static func setupView(view: UIView, layout: LayoutProtocol) {
-    guard let view = view as? View else {
-      fatalError()
-    }
-    
-    guard let layout = layout as? Layout else {
-      fatalError()
-    }
-    
-    view.image = layout.image
-  }
-  
 }

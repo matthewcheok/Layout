@@ -21,39 +21,17 @@ public protocol LayoutProtocol {
   
   /// If not nil, the layout is rendered using this provider
   /// - Returns: A type conforming to `LayoutProviding`.
-  static func layoutProvider() -> LayoutProviding.Type?
+  static func layoutProvider() -> LayoutProviding?
 }
 
 public extension LayoutProtocol {
   /// Defaults to flexible
   var estimatedLayoutSize: LayoutSize {
-    guard let defaultProvider = self.dynamicType.layoutProvider() as? DefaultLayoutProviding.Type else {
-      return .flexible
-    }
-    
-    let size = defaultProvider.sizeThatFits(layout: self)
-    return LayoutSize(cgSize: size)
-  }
-  
-  public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
-    guard let defaultProvider = self.dynamicType.layoutProvider() as? DefaultLayoutProviding.Type else {
-      fatalError("Implementation of computeLayout(forSize:) not provided for a non-default layout")
-    }
-
-    let size = defaultProvider.sizeThatFits(layout: self)
-    return LayoutDescription(
-      size: size,
-      items: [
-        LayoutItem(
-          path: "\(self.dynamicType)",
-          frame: CGRect(origin: .zero, size: size),
-          layout: self
-        )
-      ])
+    return .flexible
   }
   
   /// Defaults to `UIView`-less layout
-  static func layoutProvider() -> LayoutProviding.Type? {
+  static func layoutProvider() -> LayoutProviding? {
     return nil
   }
 }

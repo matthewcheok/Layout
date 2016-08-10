@@ -86,6 +86,8 @@ public class LayoutHostingView: UIView {
     layoutDescription = layout.computeLayout(forSize: contentSize)
   }
   
+  var layoutProviders = [String: LayoutProviding]()
+  
   private func applyViewChanges(_ items: [LayoutItem]) {
     let newPaths = items.map { $0.path }
     let removedPaths = Set(layoutChildren.keys).subtracting(Set(newPaths))
@@ -98,8 +100,16 @@ public class LayoutHostingView: UIView {
     }
     
     for item in items {
-      guard let provider = item.layout.dynamicType.layoutProvider() else {
-        continue
+      let provider: LayoutProviding
+      if let p = layoutProviders[String(item.layout.dynamicType)] {
+        provider = p
+      } else {
+        guard let p = item.layout.dynamicType.layoutProvider() else {
+          continue
+        }
+        
+        layoutProviders[String(item.layout.dynamicType)] = p
+        provider = p
       }
       
       let view: UIView

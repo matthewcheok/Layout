@@ -8,17 +8,21 @@
 
 import UIKit
 
-public struct WrappedComponent<View: UIView>: LayoutProtocol, LayoutProviding {
+public struct WrappedComponent<View: UIView>: LayoutProtocol {
+  public typealias SetupClosure = (View) -> Void
   public let size: LayoutSize
-  public let configuration: (View)->Void
+  public let setup: SetupClosure
   
-  public static func layoutProvider() -> LayoutProviding.Type? {
-    return self
+  public static func layoutProvider() -> LayoutProviding? {
+    return LayoutProvider<View, WrappedComponent<View>>(setup: {
+      (view, layout) in
+      layout.setup(view)
+    })
   }
   
-  public init(size: LayoutSize = .flexible, configuration: (View)->Void) {
+  public init(size: LayoutSize = .flexible, setup: SetupClosure) {
     self.size = size
-    self.configuration = configuration
+    self.setup = setup
   }
   
   public var estimatedLayoutSize: LayoutSize {
@@ -48,20 +52,22 @@ public struct WrappedComponent<View: UIView>: LayoutProtocol, LayoutProviding {
                           layout: self
                         )])
   }
-  
-  public static func createView() -> UIView {
-    return View()
-  }
-  
-  public static func setupView(view: UIView, layout: LayoutProtocol) {
-    guard let view = view as? View else {
-      fatalError()
+}
+
+private extension LayoutDimension {
+  func restrictedLength(_ length: LayoutDimension) -> LayoutDimension {
+    switch (self, length) {
+    case let (.fixed(length), _):
+      return .fixed(length)
+    case let (.maximum(length), _):
+      return .maximum(length)
+    case let (_, .fixed(length)):
+      return .fixed(length)
+    case let (_, .maximum(length)):
+      return .maximum(length)
+    default:
+      return self
     }
-    
-    guard let layout = layout as? WrappedComponent else {
-      fatalError()
-    }
-    
-    layout.configuration(view)
   }
 }
+

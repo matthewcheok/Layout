@@ -12,36 +12,83 @@ import UIKit
 public protocol LayoutProviding {
   /// Called if there is no view available for this component.
   /// - Returns: An instance of a `UIView` subclass.
-  static func createView() -> UIView
+  func createView() -> UIView
   
   /// Called to setup a view for display.
   /// This is the right hook to transfer relevant properties from the
   /// layout to the view.
   /// - Parameter view: An instance of `UIView` returned in `createView()`.
   /// - Parameter layout: The layout to be configured.
-  static func setupView(view: UIView, layout: LayoutProtocol)
+  func setupView(view: UIView, layout: LayoutProtocol)
 }
 
-/// Makes the infrastructure instantiate an extra copy of the view
-/// to calculate size information.
-public protocol DefaultLayoutProviding: LayoutProviding {
-  static func sizeThatFits(layout: LayoutProtocol) -> CGSize
+public struct LayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
+  public typealias CreateClosure = () -> View
+  public typealias SetupClosure = (view: View, layout: Layout) -> Void
+  
+  let create: CreateClosure
+  let setup: SetupClosure
+  
+  public init(create: CreateClosure = { View() }, setup: SetupClosure) {
+    self.create = create
+    self.setup = setup
+  }
+  
+  public func createView() -> UIView {
+    return create()
+  }
+  
+  public func setupView(view: UIView, layout: LayoutProtocol) {
+    guard let view = view as? View else {
+      fatalError()
+    }
+    
+    guard let layout = layout as? Layout else {
+      fatalError()
+    }
+    
+    setup(view: view, layout: layout)
+  }
 }
 
 private var cachedViews = [String: UIView]()
 
-public extension DefaultLayoutProviding {
-  /// Defaults to `false`
-  static var usesSizeToFit: Bool {
-    return false
+/// Makes the infrastructure instantiate an extra copy of the view
+/// to calculate size information.
+public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
+  public typealias CreateClosure = () -> View
+  public typealias SetupClosure = (view: View, layout: Layout) -> Void
+  
+  let create: CreateClosure
+  let setup: SetupClosure
+  
+  public init(create: CreateClosure = { View() }, setup: SetupClosure) {
+    self.create = create
+    self.setup = setup
   }
   
-  static func sizeThatFits(layout: LayoutProtocol) -> CGSize {
-    let view: UIView
-    if let sample = cachedViews[String(self.dynamicType)] {
+  public func createView() -> UIView {
+    return create()
+  }
+  
+  public func setupView(view: UIView, layout: LayoutProtocol) {
+    guard let view = view as? View else {
+      fatalError()
+    }
+    
+    guard let layout = layout as? Layout else {
+      fatalError()
+    }
+    
+    setup(view: view, layout: layout)
+  }
+  
+  func sizeThatFits(layout: Layout) -> CGSize {
+    let view: View
+    if let sample = cachedViews[String(self.dynamicType)] as? View {
       view = sample
     } else {
-      view = createView()
+      view = createView() as! View
       cachedViews[String(self.dynamicType)] = view
     }
     
@@ -50,4 +97,3 @@ public extension DefaultLayoutProviding {
     return size
   }
 }
-

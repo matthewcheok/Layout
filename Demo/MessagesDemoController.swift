@@ -221,7 +221,7 @@ struct DoodleComponent: CompositeLayout {
           )
         ),
         background:
-        WrappedComponent<UIView>(configuration: { (view) in
+        WrappedComponent<UIView>(setup: { (view) in
           view.backgroundColor = UIColor(red:0.10, green:0.10, blue:0.10, alpha:1.0)
         })
       )
