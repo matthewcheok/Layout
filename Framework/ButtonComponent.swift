@@ -11,18 +11,21 @@ import UIKit
 public struct ButtonComponent: LayoutProtocol {
   let title: String?
   let image: UIImage?
+  let background: UIImage?
   let action: () -> Void
   
   static let provider = DefaultLayoutProvider<UIButton, ButtonComponent>(setup: {
-      (view, layout) in
-      view.setTitle(layout.title, for: .normal)
-      view.setImage(layout.image, for: .normal)
-      view.actionHandle(controlEvents: .touchUpInside, ForAction: layout.action)
-    })
+    (view, layout) in
+    view.setTitle(layout.title, for: .normal)
+    view.setImage(layout.image, for: .normal)
+    view.setBackgroundImage(layout.background, for: .normal)
+    view.actionHandle(controlEvents: .touchUpInside, ForAction: layout.action)
+  })
   
-  public init(title: String? = nil, image: UIImage? = nil, action: () -> Void) {
+  public init(title: String? = nil, image: UIImage? = nil, background: UIImage? = nil, action: () -> Void) {
     self.title = title
     self.image = image
+    self.background = background
     self.action = action
   }
 
@@ -32,7 +35,14 @@ public struct ButtonComponent: LayoutProtocol {
   }
 
   public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
-    let size = self.dynamicType.provider.sizeThatFits(layout: self)
+    var size = self.dynamicType.provider.sizeThatFits(layout: self)
+    if case .fixed(let length) = containingSize.width {
+      size.width = length
+    }
+    if case .fixed(let length) = containingSize.height {
+      size.height = length
+    }
+
     return LayoutDescription(
       size: size,
       items: [

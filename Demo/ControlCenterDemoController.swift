@@ -9,6 +9,8 @@
 import UIKit
 import Layout
 
+private let kBackgroundColor = UIColor(white: 0.68, alpha: 1)
+
 struct CircleButtonComponent: CompositeLayout {
   enum State {
     case normal
@@ -19,25 +21,12 @@ struct CircleButtonComponent: CompositeLayout {
   let state: State
   
   var content: LayoutProtocol {
-    return BackgroundLayout(
+    let color = self.state == .selected ? UIColor(red:0.00, green:0.48, blue:1.00, alpha:1.0) : kBackgroundColor
+    return RestrictedLayout(
+      size: CGSize(width: 48, height: 48),
       content:
-      RestrictedLayout(
-        size: CGSize(width: 48, height: 48),
-        content:
-        StackLayout(
-          direction: .vertical,
-          align: .center,
-          justify: .center,
-          children: [
-            ImageComponent(image: image)
-          ]
-        )
-      ),
-      background:
-      WrappedComponent<UIView> {
-        $0.backgroundColor = self.state == .selected ? UIColor(red:0.00, green:0.48, blue:1.00, alpha:1.0) : UIColor(white: 0, alpha: 0.2)
-        $0.layer.cornerRadius = 24
-      }
+      ButtonComponent(title: nil, image: image, background: RoundedBackground.image(color: color, cornerRadius: 24), action: {
+      })
     )
   }
 }
@@ -46,25 +35,11 @@ struct RoundedButtonComponent: CompositeLayout {
   let image: UIImage?
   
   var content: LayoutProtocol {
-    return BackgroundLayout(
+    return RestrictedLayout(
+      size: CGSize(width: 60, height: 60),
       content:
-      RestrictedLayout(
-        size: CGSize(width: 60, height: 60),
-        content:
-        StackLayout(
-          direction: .vertical,
-          align: .center,
-          justify: .center,
-          children: [
-            ImageComponent(image: image)
-          ]
-        )
-      ),
-      background:
-      WrappedComponent<UIView> {
-        $0.backgroundColor = UIColor(white: 0, alpha: 0.2)
-        $0.layer.cornerRadius = 12
-      }
+      ButtonComponent(title: nil, image: image, background: RoundedBackground.image(color: kBackgroundColor, cornerRadius: 12), action: {
+      })
     )
   }
 }
@@ -100,7 +75,8 @@ struct RoundedRowComponent: CompositeLayout {
         )
       ),
       background:
-      ImageComponent(image: RoundedBackground.image(color: UIColor(white: 0, alpha: 0.2), cornerRadius: 12, corners: corners))
+      ButtonComponent(background: RoundedBackground.image(color: kBackgroundColor, cornerRadius: 12, corners: corners), action: { 
+      })
     )
   }
 }
