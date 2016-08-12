@@ -14,7 +14,6 @@ public protocol LayoutProtocol {
   var estimatedLayoutSize: LayoutSize { get }
   
   /// Computes the frames for the layout in the containing size
-  ///
   /// - Parameter containingSize: The containing size to layout in.
   /// - Returns: The layout description containing the final size and layout items.
   func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription

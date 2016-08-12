@@ -118,10 +118,10 @@ public class LayoutHostingView: UIView {
       } else if let dequeuedView = layoutManager.dequeueView(layoutType: item.layout.dynamicType) {
         view = dequeuedView
       } else  {
-        view = provider.createView()
+        view = provider.create()
       }
       
-      provider.setupView(view: view, layout: item.layout)
+      provider.setup(view: view, with: item.layout)
       layoutChildren[item.path] = (item, view)
       addSubview(view)
     }

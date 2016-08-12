@@ -12,33 +12,41 @@ import UIKit
 public protocol LayoutProviding {
   /// Called if there is no view available for this component.
   /// - Returns: An instance of a `UIView` subclass.
-  func createView() -> UIView
+  func create() -> UIView
   
   /// Called to setup a view for display.
   /// This is the right hook to transfer relevant properties from the
   /// layout to the view.
   /// - Parameter view: An instance of `UIView` returned in `createView()`.
   /// - Parameter layout: The layout to be configured.
-  func setupView(view: UIView, layout: LayoutProtocol)
+  func setup(view: UIView, with layout: LayoutProtocol)
+  
+  /// Determines where subviews are mounted in the view instance.
+  /// - Parameter view: An instance of `UIView` returned in `createView()`.
+  /// - Returns: An instance of `UIView` in the view hierarchy of `view`.
+  func mount(in view: UIView) -> UIView
 }
 
 public struct LayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
   public typealias CreateClosure = () -> View
-  public typealias SetupClosure = (view: View, layout: Layout) -> Void
+  public typealias SetupClosure = (view: View, with: Layout) -> Void
+  public typealias MountClosure = (in: View) -> UIView
   
-  let create: CreateClosure
-  let setup: SetupClosure
+  let createClosure: CreateClosure
+  let setupClosure: SetupClosure
+  let mountClosure: MountClosure
   
-  public init(create: CreateClosure = { View() }, setup: SetupClosure) {
-    self.create = create
-    self.setup = setup
+  public init(create: CreateClosure = { View() }, setup: SetupClosure, mount: MountClosure = { $0 }) {
+    self.createClosure = create
+    self.setupClosure = setup
+    self.mountClosure = mount
   }
   
-  public func createView() -> UIView {
-    return create()
+  public func create() -> UIView {
+    return createClosure()
   }
   
-  public func setupView(view: UIView, layout: LayoutProtocol) {
+  public func setup(view: UIView, with layout: LayoutProtocol) {
     guard let view = view as? View else {
       fatalError()
     }
@@ -47,7 +55,11 @@ public struct LayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProvid
       fatalError()
     }
     
-    setup(view: view, layout: layout)
+    setupClosure(view: view, with: layout)
+  }
+  
+  public func mount(in view: UIView) -> UIView {
+    return mountClosure(in: view as! View)
   }
 }
 
@@ -57,21 +69,21 @@ private var cachedViews = [String: UIView]()
 /// to calculate size information.
 public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
   public typealias CreateClosure = () -> View
-  public typealias SetupClosure = (view: View, layout: Layout) -> Void
+  public typealias SetupClosure = (view: View, with: Layout) -> Void
   
-  let create: CreateClosure
-  let setup: SetupClosure
+  let createClosure: CreateClosure
+  let setupClosure: SetupClosure
   
   public init(create: CreateClosure = { View() }, setup: SetupClosure) {
-    self.create = create
-    self.setup = setup
+    self.createClosure = create
+    self.setupClosure = setup
   }
   
-  public func createView() -> UIView {
-    return create()
+  public func create() -> UIView {
+    return createClosure()
   }
   
-  public func setupView(view: UIView, layout: LayoutProtocol) {
+  public func setup(view: UIView, with layout: LayoutProtocol) {
     guard let view = view as? View else {
       fatalError()
     }
@@ -80,7 +92,7 @@ public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: Layou
       fatalError()
     }
     
-    setup(view: view, layout: layout)
+    setupClosure(view: view, with: layout)
   }
   
   func sizeThatFits(layout: Layout) -> CGSize {
@@ -88,12 +100,16 @@ public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: Layou
     if let sample = cachedViews[String(self.dynamicType)] as? View {
       view = sample
     } else {
-      view = createView() as! View
+      view = create() as! View
       cachedViews[String(self.dynamicType)] = view
     }
     
-    setupView(view: view, layout: layout)
+    setup(view: view, with: layout)
     let size = view.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude))
     return size
+  }
+  
+  public func mount(in view: UIView) -> UIView {
+    return view
   }
 }
