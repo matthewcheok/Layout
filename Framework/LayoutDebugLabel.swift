@@ -15,7 +15,15 @@ class LayoutDebugLabel: UIView {
   var layoutItem: LayoutItem? {
     didSet {
       if let layoutItem = layoutItem {
-        titleLabel.text = "\(layoutItem.path)\n\(layoutItem.frame)"
+        let pathString =
+          layoutItem
+            .path
+            .components(separatedBy: ".")
+            .enumerated()
+            .map { String(Array<Character>(repeating: " ", count: $0)) + $1 }
+            .joined(separator: "\n")
+        let frameString = String(format: "{%.2f, %.2f, %.2f, %.2f}", layoutItem.frame.origin.x, layoutItem.frame.origin.y, layoutItem.frame.size.width, layoutItem.frame.size.height)
+        titleLabel.text = "\(frameString)\n\(pathString)"
       } else {
         titleLabel.text = nil
       }
@@ -32,6 +40,7 @@ class LayoutDebugLabel: UIView {
     titleLabel.textColor = .white
     titleLabel.shadowOffset = CGSize(width: 0, height: 1)
     titleLabel.shadowColor = .black
+    titleLabel.font = UIFont(name: "Menlo", size: 12)
     addSubview(titleLabel)
   }
   
