@@ -47,7 +47,7 @@ public struct WrappedComponent<View: UIView>: LayoutProtocol {
     return LayoutDescription(size: result,
                       items: [
                         LayoutItem(
-                          path: "\(self.dynamicType)",
+                          path: String(describing: type(of: self)),
                           frame: CGRect(origin: .zero, size: result),
                           layout: self
                         )])

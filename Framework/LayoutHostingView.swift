@@ -93,7 +93,7 @@ public class LayoutHostingView: UIView {
     let removedPaths = Set(layoutChildren.keys).subtracting(Set(newPaths))
     for path in removedPaths {
       if let (item, view) = layoutChildren[path] {
-        layoutManager.enqueueView(view: view, layoutType: item.layout.dynamicType)
+        layoutManager.enqueueView(view: view, layoutType: type(of: item.layout))
         view.removeFromSuperview()
       }
       layoutChildren[path] = nil
@@ -101,21 +101,21 @@ public class LayoutHostingView: UIView {
     
     for item in items {
       let provider: LayoutProviding
-      if let p = layoutProviders[String(item.layout.dynamicType)] {
+      if let p = layoutProviders[String(describing: type(of: item.layout))] {
         provider = p
       } else {
-        guard let p = item.layout.dynamicType.layoutProvider() else {
+        guard let p = type(of: item.layout).layoutProvider() else {
           continue
         }
         
-        layoutProviders[String(item.layout.dynamicType)] = p
+        layoutProviders[String(describing: type(of: item.layout))] = p
         provider = p
       }
       
       let view: UIView
       if let (_, oldView) = layoutChildren[item.path] {
         view = oldView
-      } else if let dequeuedView = layoutManager.dequeueView(layoutType: item.layout.dynamicType) {
+      } else if let dequeuedView = layoutManager.dequeueView(layoutType: type(of: item.layout)) {
         view = dequeuedView
       } else  {
         view = provider.create()

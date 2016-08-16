@@ -12,21 +12,21 @@ class LayoutManager {
   private var cache = [String: [UIView]]()
   
   func dequeueView(layoutType: Any.Type) -> UIView? {
-    guard var views = cache[String(layoutType)] else {
+    guard var views = cache[String(describing: layoutType)] else {
       return nil
     }
     
     guard let view = views.popLast() else {
       return nil
     }
-    cache[String(layoutType)] = views
+    cache[String(describing: layoutType)] = views
     
     return view
   }
   
   func enqueueView(view: UIView, layoutType: Any.Type) {
-    var views = cache[String(layoutType)] ?? []
+    var views = cache[String(describing: layoutType)] ?? []
     views.append(view)
-    cache[String(layoutType)] = views
+    cache[String(describing: layoutType)] = views
   }
 }

@@ -22,7 +22,7 @@ public extension CompositeLayout {
     return LayoutDescription(
       size: info.size,
       items: info.items.map {
-        $0.extendPath("\(self.dynamicType)")
+        $0.extendPath(String(describing: type(of: self)))
       })
   }
 }

@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class LayoutViewController: UIViewController {
+open class LayoutViewController: UIViewController {
   public let hostingView = LayoutHostingView()
   
   public var layout: LayoutProtocol = NilLayout() {
@@ -17,12 +17,12 @@ public class LayoutViewController: UIViewController {
     }
   }
   
-  override public func viewDidLoad() {
+  override open func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(hostingView)
   }
   
-  override public func viewWillLayoutSubviews() {
+  override open func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     hostingView.frame = view.bounds
   }

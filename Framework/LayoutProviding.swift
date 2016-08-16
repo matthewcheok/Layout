@@ -29,8 +29,8 @@ public protocol LayoutProviding {
 
 public struct LayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
   public typealias CreateClosure = () -> View
-  public typealias SetupClosure = (view: View, with: Layout) -> Void
-  public typealias MountClosure = (in: View) -> UIView
+  public typealias SetupClosure = (View, Layout) -> Void
+  public typealias MountClosure = (View) -> UIView
   
   let createClosure: CreateClosure
   let setupClosure: SetupClosure
@@ -55,11 +55,11 @@ public struct LayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProvid
       fatalError()
     }
     
-    setupClosure(view: view, with: layout)
+    setupClosure(view, layout)
   }
   
   public func mount(in view: UIView) -> UIView {
-    return mountClosure(in: view as! View)
+    return mountClosure(view as! View)
   }
 }
 
@@ -69,7 +69,7 @@ private var cachedViews = [String: UIView]()
 /// to calculate size information.
 public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: LayoutProviding {
   public typealias CreateClosure = () -> View
-  public typealias SetupClosure = (view: View, with: Layout) -> Void
+  public typealias SetupClosure = (View, Layout) -> Void
   
   let createClosure: CreateClosure
   let setupClosure: SetupClosure
@@ -92,16 +92,16 @@ public struct DefaultLayoutProvider<View: UIView, Layout: LayoutProtocol>: Layou
       fatalError()
     }
     
-    setupClosure(view: view, with: layout)
+    setupClosure(view, layout)
   }
   
   func sizeThatFits(layout: Layout) -> CGSize {
     let view: View
-    if let sample = cachedViews[String(self.dynamicType)] as? View {
+    if let sample = cachedViews[String(describing: type(of: self))] as? View {
       view = sample
     } else {
       view = create() as! View
-      cachedViews[String(self.dynamicType)] = view
+      cachedViews[String(describing: type(of: self))] = view
     }
     
     setup(view: view, with: layout)

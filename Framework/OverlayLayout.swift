@@ -28,7 +28,7 @@ public struct OverlayLayout: LayoutProtocol {
         overlay
           .computeLayout(forSize: contentSize)
           .items,        
-        ].flatten()))
+        ].joined()))
   }
   
 }

@@ -182,7 +182,7 @@ public struct StackLayout: LayoutProtocol {
       path: "StackLayout",
       frame: CGRect(origin: .zero, size: result),
       layout: self)
-    return LayoutDescription(size: result, items: [debugItem] + adjustedInfo.map { $0.items }.flatten())
+    return LayoutDescription(size: result, items: [debugItem] + adjustedInfo.map { $0.items }.joined())
   }
   
 }

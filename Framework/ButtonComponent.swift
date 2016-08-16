@@ -19,10 +19,10 @@ public struct ButtonComponent: LayoutProtocol {
     view.setTitle(layout.title, for: .normal)
     view.setImage(layout.image, for: .normal)
     view.setBackgroundImage(layout.background, for: .normal)
-    view.actionHandle(controlEvents: .touchUpInside, ForAction: layout.action)
+    view.actionHandle(controlEvents: .touchUpInside, forAction: layout.action)
   })
   
-  public init(title: String? = nil, image: UIImage? = nil, background: UIImage? = nil, action: () -> Void) {
+  public init(title: String? = nil, image: UIImage? = nil, background: UIImage? = nil, action: @escaping () -> Void) {
     self.title = title
     self.image = image
     self.background = background
@@ -30,12 +30,12 @@ public struct ButtonComponent: LayoutProtocol {
   }
 
   public var estimatedLayoutSize: LayoutSize {
-    let size = self.dynamicType.provider.sizeThatFits(layout: self)
+    let size = type(of: self).provider.sizeThatFits(layout: self)
     return LayoutSize(cgSize: size)
   }
 
   public func computeLayout(forSize containingSize: LayoutSize) -> LayoutDescription {
-    var size = self.dynamicType.provider.sizeThatFits(layout: self)
+    var size = type(of: self).provider.sizeThatFits(layout: self)
     if case .fixed(let length) = containingSize.width {
       size.width = length
     }
@@ -75,7 +75,7 @@ extension UIButton {
     self.actionHandleBlock()
   }
   
-  private func actionHandle(controlEvents events :UIControlEvents, ForAction action:() -> Void) {
+  func actionHandle(controlEvents events :UIControlEvents, forAction action:(() -> Void)?) {
     self.actionHandleBlock(action: action)
     self.addTarget(self, action: #selector(UIButton.triggerActionHandleBlock), for: events)
   }

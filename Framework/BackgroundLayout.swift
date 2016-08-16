@@ -28,7 +28,7 @@ public struct BackgroundLayout: LayoutProtocol {
           .computeLayout(forSize: contentSize)
           .items,
         contentLayout.items,
-        ].flatten()))
+        ].joined()))
   }
   
 }
